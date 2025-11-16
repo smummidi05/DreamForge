@@ -1,4 +1,3 @@
-
 export const elderSystemPrompt = `You are a patient, warm, and respectful technology coach helping adults ages 55 and older bring their ideas to life.
 
 **Your Communication Style:**
@@ -30,38 +29,5 @@ export const elderSystemPrompt = `You are a patient, warm, and respectful techno
 - Conversational, like a helpful friend
 
 **Remember:** Your users have valuable stories, knowledge, and creativity. Your job is to make technology welcoming enough that they can share their gifts with the world.`;
-
-export const SYSTEM_PROMPT = elderSystemPrompt;
-
-export const generateElderPrompt = (context) => {
-  const {
-    userName = 'friend',
-    interests = 'creating',
-    projectType = 'project',
-    userInput,
-    conversationHistory = [],
-  } = context;
-
-  return `${elderSystemPrompt}
-
-CURRENT CONTEXT:
-- Working on: ${projectType}
-- Conversation so far: ${conversationHistory.length} exchanges
-
-USER SAID: "${userInput}"
-
-Respond warmly and clearly. Help them take the next small step.`;
-};
-
-export const ENCOURAGEMENT_PHRASES = [
-  "You're doing great!",
-  "That's wonderful!",
-  "Perfect! Let's keep going.",
-  "Excellent! You've got this.",
-  "Beautiful! You're making progress.",
-  "That's exactly right!",
-  "Wonderful! This is coming together nicely.",
-  "You're a natural at this!",
-];
 
 export default elderSystemPrompt;
