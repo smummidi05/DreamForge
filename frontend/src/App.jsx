@@ -1,14 +1,15 @@
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Landing from './pages/Landing';
+import Onboarding from './pages/Onboarding';
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Landing />} />
-        {/* Add more routes later:
         <Route path="/onboarding" element={<Onboarding />} />
+        {/* Add more routes later:
         <Route path="/builder" element={<ProjectBuilder />} />
         <Route path="/gallery" element={<Gallery />} />
         */}

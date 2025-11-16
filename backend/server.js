@@ -1,6 +1,8 @@
+
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import aiRouter from './api/ai-service.js';
 
 // Load environment variables
 dotenv.config({ path: '../.env' });
@@ -17,7 +19,8 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'healthy', 
     message: 'DreamForge API is running',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    geminiConfigured: !!process.env.GEMINI_API_KEY
   });
 });
 
@@ -28,11 +31,14 @@ app.get('/api', (req, res) => {
     version: '1.0.0',
     endpoints: {
       health: '/health',
-      ai: '/api/ai/*',
+      aiChat: 'POST /api/ai/chat',
       projects: '/api/projects/*',
     }
   });
 });
+
+// Mount AI router
+app.use('/api/ai', aiRouter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -52,4 +58,5 @@ app.use((req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 DreamForge API running on http://localhost:${PORT}`);
   console.log(`📝 Health check: http://localhost:${PORT}/health`);
+  console.log(`🤖 Gemini API: ${process.env.GEMINI_API_KEY ? '✅ Configured' : '❌ Not configured'}`);
 });
