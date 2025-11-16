@@ -1,63 +1,41 @@
-
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import aiRouter from './api/ai-service.js';
+import geminiController from './api/gemini-controller.js';
 
-// Load environment variables
-dotenv.config({ path: '../.env' });
+dotenv.config();
+
+// TEMPORARY TEST - ADD THESE LINES
+console.log('Testing .env loading...');
+console.log('OPENAI_API_KEY exists?', !!process.env.OPENAI_API_KEY);
+console.log('OPENAI_API_KEY value:', process.env.OPENAI_API_KEY?.substring(0, 30) + '...');
+console.log('All env vars:', Object.keys(process.env).filter(k => k.includes('OPENAI')));
+// END TEMPORARY TEST
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(cors());
+// Debug: Print API key to verify .env is loaded
+console.log('🔑 OpenAI API Key loaded:', process.env.OPENAI_API_KEY?.substring(0, 20) + '...');
+console.log('🔑 Full key length:', process.env.OPENAI_API_KEY?.length);
+
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3001'],
+  credentials: true
+}));
 app.use(express.json());
+app.use(express.static('.'));
+app.use('/api', geminiController);
 
-// Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'healthy', 
-    message: 'DreamForge API is running',
-    timestamp: new Date().toISOString(),
-    geminiConfigured: !!process.env.GEMINI_API_KEY
-  });
+  res.json({ status: 'OK', message: 'DreamForge API is running' });
 });
 
-// API routes
-app.get('/api', (req, res) => {
-  res.json({ 
-    message: 'Welcome to DreamForge API',
-    version: '1.0.0',
-    endpoints: {
-      health: '/health',
-      aiChat: 'POST /api/ai/chat',
-      projects: '/api/projects/*',
-    }
-  });
-});
-
-// Mount AI router
-app.use('/api/ai', aiRouter);
-
-// Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ 
-    error: 'Something went wrong!',
-    message: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
+  console.error('Error:', err);
+  res.status(500).json({ error: 'Something went wrong', message: err.message });
 });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
-
-// Start server
 app.listen(PORT, () => {
-  console.log(`🚀 DreamForge API running on http://localhost:${PORT}`);
-  console.log(`📝 Health check: http://localhost:${PORT}/health`);
-  console.log(`🤖 Gemini API: ${process.env.GEMINI_API_KEY ? '✅ Configured' : '❌ Not configured'}`);
-  console.log(`🔑 API Key (first 10 chars): ${process.env.GEMINI_API_KEY?.substring(0, 10)}...`);
+  console.log(`🚀 DreamForge backend running on http://localhost:${PORT}`);
 });
