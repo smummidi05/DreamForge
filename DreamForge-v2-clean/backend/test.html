@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test DreamForge API</title>
+</head>
+<body>
+    <h1>DreamForge API Test</h1>
+    <button onclick="testChat()">Test Chat Endpoint</button>
+    <pre id="result">Click the button to test...</pre>
+
+    <script>
+        async function testChat() {
+            document.getElementById('result').textContent = 'Loading...';
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: 'Hello! Can you help me learn about websites?',
+                        conversationHistory: [],
+                        userContext: {}
+                    })
+                });
+
+                const data = await response.json();
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('result').textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
