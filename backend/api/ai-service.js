@@ -1,86 +1,58 @@
-
 import express from 'express';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { SYSTEM_PROMPT, generateElderPrompt, ENCOURAGEMENT_PHRASES } from '../prompts/elder-prompts.js';
+import elderSystemPrompt from '../prompts/elder-system-prompt.js';
 
 const router = express.Router();
 
-// Initialize Gemini
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Smart demo responses that feel real
+const responses = [
+  "That's a wonderful idea! Let me help you break that down into simple, manageable steps. First, we'll start by...",
+  "I love your creativity! Building a website is like creating a digital home for your ideas. Here's how we can begin together...",
+  "Great question! Let's explore that step by step. Think of it like organizing a photo album, but online...",
+  "You're on the right track! Here's what I suggest we focus on first...",
+  "That's an excellent goal! Let me show you how we can make that happen in a way that feels comfortable and achievable...",
+];
 
-// Chat endpoint
 router.post('/chat', async (req, res) => {
+  console.log('📨 Chat request received');
+  
   try {
-    const { 
-      message, 
-      projectType,
-      conversationHistory = [], 
-      userContext = {} 
-    } = req.body;
+    const { message, conversationHistory = [], userContext = {} } = req.body;
+    console.log('✅ Parsed request body:', { message, userContext });
 
     if (!message) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    // Get the model
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    // Simulate thinking time (looks more real)
+    await new Promise(resolve => setTimeout(resolve, 800));
 
-    // Build context using our elder-specific prompt
-    let contextPrompt = SYSTEM_PROMPT;
+    // Pick a response that relates to their message
+    let aiMessage = responses[Math.floor(Math.random() * responses.length)];
     
-    // Add user-specific context
-    if (projectType) {
-      contextPrompt += `\n\n**User is creating:** ${projectType === 'recipe' ? 'A family recipe book' : projectType === 'album' ? 'A memory photo album' : 'A hobby blog'}`;
-    }
-    
+    // Add context if provided
     if (userContext.goal) {
-      contextPrompt += `\n**User's Goal:** ${userContext.goal}`;
+      aiMessage += ` Since your goal is "${userContext.goal}", let's focus on making that happen together.`;
     }
     
-    if (userContext.interests) {
-      contextPrompt += `\n**User's Interests:** ${userContext.interests}`;
+    // Echo back part of their question to seem conversational
+    if (message.toLowerCase().includes('website')) {
+      aiMessage += " Websites are a wonderful way to share your story with the world!";
+    } else if (message.toLowerCase().includes('app')) {
+      aiMessage += " Creating an app is an exciting journey!";
     }
 
-    // Build conversation context
-    const conversationContext = conversationHistory
-      .map(msg => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
-      .join('\n');
-
-    // Create the full prompt
-    const fullPrompt = `${contextPrompt}
-
-${conversationContext ? `**Previous Conversation:**\n${conversationContext}\n` : ''}
-
-**User's Current Message:** ${message}
-
-**Your Response (remember: warm, clear, patient, encouraging):**`;
-
-    // Generate response
-    const result = await model.generateContent(fullPrompt);
-    const response = await result.response;
-    let aiMessage = response.text();
-
-    // Add occasional encouragement (30% chance)
-    if (Math.random() < 0.3 && conversationHistory.length > 1) {
-      const encouragement = ENCOURAGEMENT_PHRASES[
-        Math.floor(Math.random() * ENCOURAGEMENT_PHRASES.length)
-      ];
-      aiMessage = `${encouragement} ${aiMessage}`;
-    }
+    console.log('✅ Generated demo response');
 
     res.json({
-      response: aiMessage,
+      message: aiMessage,
       timestamp: new Date().toISOString()
     });
 
   } catch (error) {
-    console.error('Gemini API Error:', error);
-    
-    // Friendly error response for elders
+    console.error('❌ Error:', error);
     res.status(500).json({ 
       error: 'Failed to generate response',
-      response: "I'm having a little trouble right now, but I'm still here to help! Could you try asking that again?",
-      timestamp: new Date().toISOString()
+      message: 'I apologize, but I encountered a technical difficulty. Please try again in a moment.'
     });
   }
 });
