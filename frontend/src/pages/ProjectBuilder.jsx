@@ -1,4 +1,4 @@
-A
+
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Send, Mic, MicOff, Sparkles, ArrowLeft } from 'lucide-react';
@@ -73,7 +73,7 @@ function ProjectBuilder() {
       // Add AI response to chat
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: data.response || "I'm here to help! Could you tell me more about that?"
+        content: data.message || "I'm here to help! Could you tell me more about that?"
       }]);
     } catch (error) {
       console.error('Error calling AI:', error);
